@@ -1,1 +1,5 @@
 data/feature
+data/x_train.pkl
+data/x_test.pkl
+data/y_test.pkl
+data/__pycache__
