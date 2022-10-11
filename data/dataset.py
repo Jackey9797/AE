@@ -67,8 +67,9 @@ def generate_stream_data():
     normalize = lambda x: x.apply(lambda x: (x - x.min()) / (x.max() - x.min() + 1e-6) )
 
     df = get_df_data()  
-
-    df_w2 = pd.concat([df[df['week_id'] == 22] , df[df['week_id'] == 23], df[df['week_id'] == 24], df[df['week_id'] == 25]] , axis=0)
+    df.sort_values(by="week_id" , inplace=True, ascending=True)
+    # df_w2 = pd.concat([df[df['week_id'] == 22] , df[df['week_id'] == 23], df[df['week_id'] == 24], df[df['week_id'] == 25]] , axis=0)
+    df_w2 = df #! 改这里 
 
     y_data = df_w2['insider'].to_numpy()
 
@@ -82,7 +83,6 @@ def generate_stream_data():
 # In[ ]:
 
 import torch
-from torch.utils.data import DataLoader
 class oneWeek: 
     def __init__(self, data) -> None:
         super().__init__()

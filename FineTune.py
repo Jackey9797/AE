@@ -36,7 +36,7 @@ def train_valid(model):
         #---- train loop 
         model.train()
         
-        for i in range(epochs): #?
+        for i in range(epochs): 
             for idx, (X, y) in enumerate(train_dl, 1): 
                 # print(X.shape, y.shape)
                 model.optimizer.zero_grad()
@@ -59,17 +59,24 @@ def train_valid(model):
                     print("loss now:", loss)  
 
         model.eval() ## 应该影响不大把
+        anomaly_score = []
         from sklearn.metrics import roc_auc_score
         for idx, (X, y) in enumerate(test_dl, 1):  # 测试
             with torch.no_grad():
                 X_pred = model(X)  
-                loss = model.loss_func_e(X_pred, X)      
-            from sklearn.utils.multiclass import type_of_target
-       
-            # print(len(y.tolist()), len(loss.detach().tolist()))
-            AUC_score.append(roc_auc_score( y.tolist(), loss.detach().tolist())) 
+                loss = model.loss_func_e(X_pred, X)
+                loss_list = loss.detach().tolist()      
+                anomaly_score += loss_list
 
-    print(AUC_score)
+            # print(len(y.tolist()), len(loss.detach().tolist()))
+            # AUC_score = roc_auc_score(y.tolist(), loss.detach().tolist()) 
+
+
+        with open(exp_name + "Week" + str(stream) +  "_result.txt", 'w') as f: 
+            # f.write("AUC score:", str(AUC_score) + '\n')
+            for idx in range(len(anomaly_score)): 
+                f.write(str(anomaly_score[idx]) + '\n')   
+        print("\nWeek %d finished!\n" % stream)
     return model
 
 if __name__ == '__main__':
@@ -90,10 +97,10 @@ if __name__ == '__main__':
     ds = dataset.manyWeek(x, y) 
 
     lr = 1e-3
-    epochs = 0
+    epochs = 20
     # device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # print("Using %s !" % str(device))
-    batch_size = 16 #! 小一点好
+    # batch_size = 16 #! 小一点好
     input_size = 502 #* vectore size
 
     # model = autoencoder(input_size).to(device)  
@@ -105,7 +112,7 @@ if __name__ == '__main__':
     model.a = 0.2 #* 前a% 弱监督数据 百分比 超参
     model.a0 = 5
 
-    exp_name = "exp666"
+    exp_name = "exp_all_data_finetune"
     if not os.path.exists(os.path.join("exp", exp_name)):
         os.makedirs(os.path.join("exp", exp_name)) 
     exp_name = os.path.join(os.path.join("exp", exp_name), exp_name)
