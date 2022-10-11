@@ -18,7 +18,7 @@ def setup_seed(seed):
 # 设置随机数种子
 
 def train(model):
-    setup_seed(32)
+    setup_seed(3323) # exp0: 32 exp1:320 exp2:330  exp3:3323  exp4:3323     exp5:3323 
 
 #----- 数据读入
 
@@ -41,7 +41,7 @@ def train(model):
             loss.backward()
 
             model.optimizer.step()
-            if idx % 70 == 0: 
+            if idx % 7 == 0: 
                 print("loss now:", loss)  
     return model
 
@@ -68,24 +68,30 @@ if __name__ == '__main__':
 
     ds_train = dataset.oneWeek(x_train) 
     ds_test = dataset.oneWeek(x_test)  
-    train_dl = DataLoader(ds_train, shuffle=True)
-    test_dl = DataLoader(ds_test, shuffle=False)
+    
 
     lr = 1e-3
-    epochs = 10
-    batch_size = 64
+    epochs = 1
+    batch_size = 16
     input_size = ds_train[0].shape[0]
 
     model = autoencoder(input_size)  
+    model.batch_size = batch_size 
     model.optimizer = torch.optim.Adam(model.parameters(),lr = lr)
     model.loss_func = lambda x, y: torch.sum((x - y) ** 2) / x.shape[0] 
     model.metric = None #TODO 
 
-    exp_name = "exp1"
+    exp_name = "singleBaseline"
+    if not os.path.exists(os.path.join("exp", exp_name)):
+        os.makedirs(os.path.join("exp", exp_name)) 
+    exp_name = os.path.join(os.path.join("exp", exp_name), exp_name)
 
-    # model = train(model)
-    # model.save(model.state_dict, open("exp0.pth", "wb"))
-    model.load_state_dict(torch.load(open(exp_name + '.pth', "rb")))
+    train_dl = DataLoader(ds_train, shuffle=True, batch_size=model.batch_size)
+    test_dl = DataLoader(ds_test, shuffle=False)
+    model = train(model)
+    torch.save(model.state_dict(), open(exp_name + '.pth', "wb")) #! 训练则开
+
+    # model.load_state_dict(torch.load(open(exp_name + '.pth', "rb"))) #! 只测试则开 
     
     anomaly_score = []
     GT_score = []
@@ -97,7 +103,7 @@ if __name__ == '__main__':
         anomaly_score.append(loss.detach().item())
         GT_score.append(y_test[idx - 1])
 
-    torch.save(model.state_dict(), open(exp_name + '.pth', "wb"))
+    # torch.save(model.state_dict(), open(exp_name + '.pth', "wb"))
     with open(exp_name + '.txt', "w") as f:
         for score, score_ in zip(anomaly_score, GT_score):
             f.write(str(score) + ' ' + str(score_) + '\n')

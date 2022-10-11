@@ -49,7 +49,7 @@ def generate_data():
 
     df = get_df_data()  
 
-    df_w1 = df[df['week_id'] == 1] 
+    df_w1 = df[df['week_id'] == 22] 
     df_w2 = pd.concat([df[df['week_id'] == 23], df[df['week_id'] == 24], df[df['week_id'] == 25]] , axis=0)
 
     y_test = df_w2['insider'].to_numpy()
@@ -61,6 +61,22 @@ def generate_data():
     x_test = proc(df_w2).to_numpy()
 
     return x_train, x_test, y_test   
+
+def generate_stream_data():
+    proc = lambda x: x.drop(['user', 'day', 'week_id', 'starttime', 'endtime', 'insider'], axis=1) ##TODO  sessionid
+    normalize = lambda x: x.apply(lambda x: (x - x.min()) / (x.max() - x.min() + 1e-6) )
+
+    df = get_df_data()  
+
+    df_w2 = pd.concat([df[df['week_id'] == 22] , df[df['week_id'] == 23], df[df['week_id'] == 24], df[df['week_id'] == 25]] , axis=0)
+
+    y_data = df_w2['insider'].to_numpy()
+
+    df_w2 = normalize(df_w2)
+
+    x_data = proc(df_w2).to_numpy()
+
+    return x_data, y_data   
 
 
 # In[ ]:
@@ -78,6 +94,21 @@ class oneWeek:
     def __getitem__(self, idx): 
         return self.data[idx]
 
+class manyWeek: 
+    def __init__(self, data, label) -> None:
+        super().__init__()
+        self.data = torch.tensor(data, dtype=torch.float32) 
+        self.label = torch.tensor(label, dtype=torch.uint8)
+        # self.data = self.data.reshape(-1, 1, 502)
+        # self.label = self.label.reshape(-1, 1)
+
+    def __len__(self): 
+        return len(self.label) 
+
+    def __getitem__(self, idx):
+        # self.data[idx].unsqueeze(0) 
+        # print(idx, self.data[idx].shape)
+        return self.data[idx], self.label[idx]  ##TODO dataset test
 
 # In[ ]:
 
