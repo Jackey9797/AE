@@ -17,13 +17,18 @@ def setup_seed(seed):
     torch.backends.cudnn.deterministic = True
 # 设置随机数种子
 
+def get_reg(x, y): 
+    if y == None: return 0 
+    return torch.sum((x - y) ** 2)
+
 def train_valid(model):
     setup_seed(3323)    
     from torch.utils.data import Subset
     AUC_score = []
-
+    p = []
 
     data_stream = int(len(ds) / 7000) - 1
+    data_stream = 70 #!
     week_n = 7000
 
     for stream in range(1, data_stream + 1): 
@@ -33,14 +38,20 @@ def train_valid(model):
         train_dl = DataLoader(ds_1, shuffle=False, batch_size=week_n) # 直接把一周所有数据当一个batch输入
         test_dl = DataLoader(ds_2, shuffle=False, batch_size=week_n) 
 
+        if stream == 1: 
+            dis_loss = None  
+        else : 
+            old_sample = torch.concat([x.reshape(1,-1) for x in p], axis=0)
+            q = model(old_sample).detach()
+            dis_loss = q
         #---- train loop 
         model.train()
-        
+        tmp = []
         for i in range(epochs): 
             for idx, (X, y) in enumerate(train_dl, 1): 
                 # print(X.shape, y.shape)
                 model.optimizer.zero_grad()
-                X_pred = model(X)
+                X_pred, ft = model(X, return_feature=True)
                 e = model.loss_func_e(X_pred, X) # 计算异常分数
 
                 idx_sorted = list(range(len(X))) 
@@ -49,7 +60,10 @@ def train_valid(model):
                 choose_mask = torch.zeros(e.shape) 
                 choose_mask[idx_sorted[:choose_num]] = 1  # 前a% 的mask为1 
 
-                loss = torch.sum(e * (1 - y) * choose_mask) + torch.sum(torch.maximum(model.a0 - e, torch.tensor([0])) * y * choose_mask) 
+                output = None
+                if dis_loss != None: output = model(old_sample)
+
+                loss = torch.sum(e * (1 - y) * choose_mask) + torch.sum(torch.maximum(model.a0 - e, torch.tensor([0])) * y * choose_mask) + get_reg(output, dis_loss) 
                 # print(loss.shape)          
                 # loss
                 loss.backward() # 
@@ -57,6 +71,18 @@ def train_valid(model):
                 model.optimizer.step()
                 if idx % 1 == 0: 
                     print("loss now:", loss)  
+
+    
+        from iCaRL.construct import construct, reduce
+        import math     
+        if stream != 1: 
+            p = reduce(p,math.floor(model.m / (stream - 1)),  math.floor(model.m / stream)) 
+
+        p += construct(math.floor(model.m / stream), ds_1, ft)
+            # print(_[:5])     
+        print(stream, len(p))
+
+     
 
         model.eval() ## 应该影响不大把
         anomaly_score = []
@@ -111,8 +137,9 @@ if __name__ == '__main__':
     model.metric = None 
     model.a = 0.2 #* 前a% 弱监督数据 百分比 超参
     model.a0 = 5
+    model.m = 1400
 
-    exp_name = "exp_all_data_finetune_2"
+    exp_name = "exp_icarl_all_data"
     if not os.path.exists(os.path.join("exp", exp_name)):
         os.makedirs(os.path.join("exp", exp_name)) 
     exp_name = os.path.join(os.path.join("exp", exp_name), exp_name)

@@ -14,12 +14,14 @@ class autoencoder(nn.Module):
         self.de1 = nn.Linear(64, 128)  
         self.de2 = nn.Linear(128, input_size)   
 
-    def forward(self, x): 
+    def forward(self, x, return_feature=False): 
         # x = self.R(self.input_layer(x)) 
         x = self.R(self.en1(x))
         x = self.R(self.en2(x))
+        y = x.detach().clone()
         x = self.R(self.de1(x))
         x = self.de2(x)
+        if return_feature: return x, y
         return x 
 
 

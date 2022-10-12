@@ -2,6 +2,8 @@ data/feature
 data/x_train.pkl
 data/x_test.pkl
 data/y_test.pkl
+data/x.pkl
+data/y.pkl
 data/__pycache__
 
 exp
