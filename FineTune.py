@@ -18,7 +18,7 @@ def setup_seed(seed):
 # 设置随机数种子
 
 def train_valid(model):
-    setup_seed(3323)    
+    # setup_seed(3323)    
     from torch.utils.data import Subset
     AUC_score = []
 
@@ -30,7 +30,7 @@ def train_valid(model):
         pre = (stream - 1) * 7000
         ds_1 = Subset(ds, range(pre, pre + week_n)) # 按周划分数据
         ds_2 = Subset(ds, range(pre + week_n, pre + 2 * week_n))
-        train_dl = DataLoader(ds_1, shuffle=False, batch_size=week_n) # 直接把一周所有数据当一个batch输入
+        train_dl = DataLoader(ds_1, shuffle=True, batch_size=week_n) # 直接把一周所有数据当一个batch输入
         test_dl = DataLoader(ds_2, shuffle=False, batch_size=week_n) 
 
         #---- train loop 
@@ -112,7 +112,7 @@ if __name__ == '__main__':
     model.a = 0.2 #* 前a% 弱监督数据 百分比 超参
     model.a0 = 5
 
-    exp_name = "exp_all_data_finetune_2"
+    exp_name = "exp_all_data_finetune_6"
     if not os.path.exists(os.path.join("exp", exp_name)):
         os.makedirs(os.path.join("exp", exp_name)) 
     exp_name = os.path.join(os.path.join("exp", exp_name), exp_name)

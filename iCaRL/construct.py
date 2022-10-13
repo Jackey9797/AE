@@ -14,6 +14,8 @@ def reduce(p, m_, m):
 
 
 def construct(m, sub_ds, feature):
+    import time 
+    t0 = time.time()
     MAX_VAL = 1e20 ##  
     n = len(sub_ds)
     mu = torch.sum(torch.concat([feature[i].reshape(1, -1) for i in range(n)]), axis=0) / n 
@@ -34,6 +36,7 @@ def construct(m, sub_ds, feature):
         sum_score += feature[min_idx].reshape(1, -1) 
         p.append(sub_ds[min_idx][0]) 
         vis[min_idx] = 1
+    print("weew:\n", time.time()-t0)
 
     return p 
 
