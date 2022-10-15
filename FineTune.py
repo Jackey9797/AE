@@ -17,7 +17,7 @@ def setup_seed(seed):
     torch.backends.cudnn.deterministic = True
 # 设置随机数种子
 
-def train_valid(model):
+def train_valid(model, ds):
     # setup_seed(3323)    
     from torch.utils.data import Subset
     AUC_score = []
@@ -36,7 +36,7 @@ def train_valid(model):
         #---- train loop 
         model.train()
         
-        for i in range(epochs): 
+        for i in range(model.epochs): 
             for idx, (X, y) in enumerate(train_dl, 1): 
                 # print(X.shape, y.shape)
                 model.optimizer.zero_grad()
@@ -72,14 +72,14 @@ def train_valid(model):
             # AUC_score = roc_auc_score(y.tolist(), loss.detach().tolist()) 
 
 
-        with open(exp_name + "Week" + str(stream) +  "_result.txt", 'w') as f: 
+        with open(model.exp_name + "Week" + str(stream) +  "_result.txt", 'w') as f: 
             # f.write("AUC score:", str(AUC_score) + '\n')
             for idx in range(len(anomaly_score)): 
                 f.write(str(anomaly_score[idx]) + '\n')   
         print("\nWeek %d finished!\n" % stream)
     return model
 
-if __name__ == '__main__':
+def FineTune(exp_name): 
     x, y = None , None
 
     if not os.path.exists('data/x.pkl'):
@@ -109,32 +109,12 @@ if __name__ == '__main__':
     model.loss_func_e = lambda x, y: torch.sqrt(torch.sum((x - y) ** 2, axis=1)) 
     model.loss_func = None 
     model.metric = None 
+    model.epochs = epochs 
     model.a = 0.2 #* 前a% 弱监督数据 百分比 超参
     model.a0 = 5
 
-    exp_name = "exp_all_data_finetune_6"
     if not os.path.exists(os.path.join("exp", exp_name)):
         os.makedirs(os.path.join("exp", exp_name)) 
     exp_name = os.path.join(os.path.join("exp", exp_name), exp_name)
-
-    model = train_valid(model)
-    # torch.save(model.state_dict(), open(exp_name + '.pth', "wb")) #! 训练则开
-
-    # # model.load_state_dict(torch.load(open(exp_name + '.pth', "rb"))) #! 只测试则开 
-    
-    # anomaly_score = []
-    # GT_score = []
-
-    # model.eval() 
-    # for idx, X in enumerate(test_dl, 1): 
-    #     X_pred = model(X)  
-    #     loss = model.loss_func(X_pred, X)             
-    #     anomaly_score.append(loss.detach().item())
-    #     GT_score.append(y_test[idx - 1])
-
-    # # torch.save(model.state_dict(), open(exp_name + '.pth', "wb"))
-    # with open(exp_name + '.txt', "w") as f:
-    #     for score, score_ in zip(anomaly_score, GT_score):
-    #         f.write(str(score) + ' ' + str(score_) + '\n')
-
-    
+    model.exp_name = exp_name
+    model = train_valid(model, ds)

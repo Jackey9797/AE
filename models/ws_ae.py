@@ -12,7 +12,7 @@ class autoencoder(nn.Module):
         self.en1 = nn.Linear(input_size, 128)  
         self.en2 = nn.Linear(128, 64)  
         self.de1 = nn.Linear(64, 128)  
-        self.de2 = nn.Linear(128, input_size)   
+        self.de2 = nn.Linear(128, input_size)    
 
     def forward(self, x, return_feature=False): 
         # x = self.R(self.input_layer(x)) 
@@ -21,7 +21,7 @@ class autoencoder(nn.Module):
         y = x.detach().clone()
         x = self.R(self.de1(x))
         x = self.de2(x)
-        if return_feature: return x, y
+        if return_feature: return x, y ##!
         return x 
 
 

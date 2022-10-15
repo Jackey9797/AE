@@ -1,4 +1,9 @@
 import torch
+
+def cal_NN(ft, q): 
+    score = torch.sum((ft.reshape(ft.shape[0], 1, ft.shape[1]).repeat(1, q.shape[0], 1) - q) ** 2, axis=2)
+    return torch.min(score, dim=1)[0].tolist() 
+
 def get_norm2(x): 
     return torch.sqrt(torch.sum(x ** 2))
 
@@ -19,7 +24,6 @@ def construct(m, sub_ds, feature):
     MAX_VAL = 1e20 ##  
     n = len(sub_ds)
     mu = torch.sum(torch.concat([feature[i].reshape(1, -1) for i in range(n)]), axis=0) / n 
-    # print(mu) #TODO
     p = [] 
     vis = {}
     sum_score = torch.zeros(1, len(feature[0]))
@@ -30,7 +34,7 @@ def construct(m, sub_ds, feature):
         for j in range(0, n):
             vis.setdefault(j, 0)
             if vis[j] == 1: continue  
-            val = get_norm2(mu - (feature[j] + sum_score)) 
+            val = get_norm2(mu - (feature[j] + sum_score) / (i + 1)) 
             if min_val > val: min_val = val; min_idx = j 
 
         sum_score += feature[min_idx].reshape(1, -1) 

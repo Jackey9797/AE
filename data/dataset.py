@@ -44,7 +44,7 @@ df = get_df_data()
 
 
 def generate_data():
-    proc = lambda x: x.drop(['user', 'day', 'week_id', 'starttime', 'endtime', 'insider'], axis=1) ##TODO  sessionid
+    proc = lambda x: x.drop(['user', 'day', 'week_id', 'starttime', 'endtime', 'insider'], axis=1) 
     normalize = lambda x: x.apply(lambda x: (x - x.min()) / (x.max() - x.min() + 1e-6) )
 
     df = get_df_data()  
@@ -62,9 +62,12 @@ def generate_data():
 
     return x_train, x_test, y_test   
 
-def generate_stream_data():
-    proc = lambda x: x.drop(['user', 'day', 'week_id', 'starttime', 'endtime', 'insider'], axis=1) ##TODO  sessionid
-    normalize = lambda x: x.apply(lambda x: (x - x.min()) / (x.max() - x.min() + 1e-6) )
+def generate_stream_data(norm='minmax'):
+    proc = lambda x: x.drop(['user', 'day', 'week_id', 'starttime', 'endtime', 'insider'], axis=1) 
+    if norm == 'minmax': 
+        normalize = lambda x: x.apply(lambda x: (x - x.min()) / (x.max() - x.min() + 1e-6) )
+    elif norm == 'zscore': 
+        normalize = lambda x: x.apply(lambda x: (x - x.mean()) / x.std() )
 
     df = get_df_data()  
     df.sort_values(by="week_id" , inplace=True, ascending=True)
@@ -108,7 +111,7 @@ class manyWeek:
     def __getitem__(self, idx):
         # self.data[idx].unsqueeze(0) 
         # print(idx, self.data[idx].shape)
-        return self.data[idx], self.label[idx]  ##TODO dataset test
+        return self.data[idx], self.label[idx]  
 
 # In[ ]:
 
