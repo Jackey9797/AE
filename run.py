@@ -1,4 +1,5 @@
 from icarl import icarl
+from FineTune import FineTune
 import argparse
 
 def parse_args(): 
@@ -13,11 +14,14 @@ def parse_args():
     parser.add_argument('--w_decay', type=float, default=0.0)                   # 步骤三，后面的help是我的描述
     parser.add_argument('--lamda', type=float, default=1)                   # 步骤三，后面的help是我的描述
     parser.add_argument('--NN', type=bool, default=False)                   # 步骤三，后面的help是我的描述
+    parser.add_argument('--st', type=str, default='original')                   # 步骤三，后面的help是我的描述
     args = parser.parse_args()                                       # 步骤四          
     return args
 
 if __name__ == "__main__": 
     args = parse_args()
 
+    if args.model == "FineTune": 
+        FineTune(args.exp_name, args.st)
     if args.model == "icarl": 
-        icarl(args.lr, args.epochs, args.exp_name, optimizer=args.optimizer, weight_decay=args.w_decay, lamda=args.lamda, NN=args.NN)
+        icarl(args.lr, args.epochs, args.exp_name, optimizer=args.optimizer, weight_decay=args.w_decay, lamda=args.lamda, NN=args.NN, setting=args.st)

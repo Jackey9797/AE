@@ -66,6 +66,8 @@ def train_valid(model, ds):
                 output = None
                 if dis_loss != None: output = model(old_sample)
 
+                if model.setting == 'new': 
+                    if stream <= 35: y = torch.zeros_like(y)  
                 loss = torch.sum(e * (1 - y) * choose_mask) + torch.sum(torch.maximum(model.a0 - e, torch.tensor([0])) * y * choose_mask) + model.lamda * get_reg(output, dis_loss) 
                 # print(loss.shape)          
                 # loss
@@ -103,7 +105,6 @@ def train_valid(model, ds):
             # print(len(y.tolist()), len(loss.detach().tolist()))
             # AUC_score = roc_auc_score(y.tolist(), loss.detach().tolist()) 
 
-
         with open(model.exp_name + "Week" + str(stream) +  "_result.txt", 'w') as f: 
             # f.write("AUC score:", str(AUC_score) + '\n')
             for idx in range(len(anomaly_score)): 
@@ -111,7 +112,7 @@ def train_valid(model, ds):
         print("\nWeek %d finished!\n" % stream)
     return model
 
-def icarl(lr, epochs, exp_name, a=0.2, a0 = 5, m=1400, optimizer="Adam", weight_decay=0,input_size=502, lamda=1.0, NN=False):
+def icarl(lr, epochs, exp_name, a=0.2, a0 = 5, m=1400, optimizer="Adam", weight_decay=0,input_size=502, lamda=1.0, NN=False, setting='original'):
     x, y = None , None
 
     if not os.path.exists('data/x.pkl'):
@@ -144,6 +145,7 @@ def icarl(lr, epochs, exp_name, a=0.2, a0 = 5, m=1400, optimizer="Adam", weight_
     model.loss_func = None 
     model.metric = None 
     model.epochs = epochs
+    model.setting = setting
     model.a = a # 0.2 #* 前a% 弱监督数据 百分比 超参
     model.a0 = a0 # 5
     model.m = m # 1400
@@ -151,9 +153,9 @@ def icarl(lr, epochs, exp_name, a=0.2, a0 = 5, m=1400, optimizer="Adam", weight_
     model.NN = NN 
 
     exp_name = exp_name # "exp_icarl_all_data_None_exp"
-    if not os.path.exists(os.path.join("exp", exp_name)):
-        os.makedirs(os.path.join("exp", exp_name)) 
-    model.exp_name = os.path.join(os.path.join("exp", exp_name), exp_name)
+    if not os.path.exists(os.path.join("exp2", exp_name)):
+        os.makedirs(os.path.join("exp2", exp_name)) 
+    model.exp_name = os.path.join(os.path.join("exp2", exp_name), exp_name)
 
     model = train_valid(model, ds)
     # torch.save(model.state_dict(), open(exp_name + '.pth', "wb")) #! 训练则开

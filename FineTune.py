@@ -49,6 +49,8 @@ def train_valid(model, ds):
                 choose_mask = torch.zeros(e.shape) 
                 choose_mask[idx_sorted[:choose_num]] = 1  # 前a% 的mask为1 
 
+                if model.setting == 'new': 
+                    if stream <= 35: y = torch.zeros_like(y)  
                 loss = torch.sum(e * (1 - y) * choose_mask) + torch.sum(torch.maximum(model.a0 - e, torch.tensor([0])) * y * choose_mask) 
                 # print(loss.shape)          
                 # loss
@@ -79,7 +81,7 @@ def train_valid(model, ds):
         print("\nWeek %d finished!\n" % stream)
     return model
 
-def FineTune(exp_name): 
+def FineTune(exp_name, setting): 
     x, y = None , None
 
     if not os.path.exists('data/x.pkl'):
@@ -107,14 +109,15 @@ def FineTune(exp_name):
     model = autoencoder(input_size) 
     model.optimizer = torch.optim.Adam(model.parameters(),lr = lr)
     model.loss_func_e = lambda x, y: torch.sqrt(torch.sum((x - y) ** 2, axis=1)) 
+    model.setting = setting
     model.loss_func = None 
     model.metric = None 
     model.epochs = epochs 
     model.a = 0.2 #* 前a% 弱监督数据 百分比 超参
     model.a0 = 5
 
-    if not os.path.exists(os.path.join("exp", exp_name)):
-        os.makedirs(os.path.join("exp", exp_name)) 
-    exp_name = os.path.join(os.path.join("exp", exp_name), exp_name)
+    if not os.path.exists(os.path.join("exp2", exp_name)):
+        os.makedirs(os.path.join("exp2", exp_name)) 
+    exp_name = os.path.join(os.path.join("exp2", exp_name), exp_name)
     model.exp_name = exp_name
     model = train_valid(model, ds)
