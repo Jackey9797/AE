@@ -68,7 +68,7 @@ def train_valid(model, ds):
                 X_pred = model(X)  
                 loss = model.loss_func_e(X_pred, X)
                 loss_list = loss.detach().tolist()      
-                anomaly_score += loss_list
+                anomaly_score += torch.sum(X > 0.0001, axis=1).tolist()
 
             # print(len(y.tolist()), len(loss.detach().tolist()))
             # AUC_score = roc_auc_score(y.tolist(), loss.detach().tolist()) 
@@ -99,7 +99,7 @@ def FineTune(exp_name, setting):
     ds = dataset.manyWeek(x, y) 
 
     lr = 1e-3
-    epochs = 20
+    epochs = 0
     # device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # print("Using %s !" % str(device))
     # batch_size = 16 #! 小一点好
