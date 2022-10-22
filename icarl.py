@@ -10,7 +10,7 @@ import dill as pickle
 from models.ws_ae import autoencoder
 from data import dataset 
 from torch.utils.data import DataLoader
-from iCaRL.utils import construct, reduce, cal_NN
+from iCaRL.utils import construct_by_score, construct_by_ft, reduce, cal_NN
 
 def setup_seed(seed):
     torch.manual_seed(seed)
@@ -80,7 +80,10 @@ def train_valid(model, ds):
         if stream != 1: 
             p = reduce(p,math.floor(model.m / (stream - 1)),  math.floor(model.m / stream)) 
         print(len(p), math.floor(model.m / stream))
-        p += construct(math.floor(model.m / stream), ds_1, ft)
+        if model.select_rule == 'ft': 
+            p += construct_by_ft(math.floor(model.m / stream), ds_1, ft)
+        elif model.select_rule == 'score': 
+            p += construct_by_score(math.floor(model.m / stream), ds_1, e)
         print(stream, len(p))
 
 
@@ -112,7 +115,7 @@ def train_valid(model, ds):
         print("\nWeek %d finished!\n" % stream)
     return model
 
-def icarl(lr, epochs, exp_name, a=0.2, a0 = 5, m=1400, optimizer="Adam", weight_decay=0,input_size=502, lamda=1.0, NN=False, setting='original'):
+def icarl(lr, epochs, exp_name, select_rule, a=0.2, a0 = 5, m=1400, optimizer="Adam", weight_decay=0,input_size=502, lamda=1.0, NN=False, setting='original' ):
     x, y = None , None
 
     if not os.path.exists('data/x.pkl'):
@@ -146,6 +149,7 @@ def icarl(lr, epochs, exp_name, a=0.2, a0 = 5, m=1400, optimizer="Adam", weight_
     model.metric = None 
     model.epochs = epochs
     model.setting = setting
+    model.select_rule = select_rule
     model.a = a # 0.2 #* 前a% 弱监督数据 百分比 超参
     model.a0 = a0 # 5
     model.m = m # 1400
@@ -153,9 +157,9 @@ def icarl(lr, epochs, exp_name, a=0.2, a0 = 5, m=1400, optimizer="Adam", weight_
     model.NN = NN 
 
     exp_name = exp_name # "exp_icarl_all_data_None_exp"
-    if not os.path.exists(os.path.join("exp2", exp_name)):
-        os.makedirs(os.path.join("exp2", exp_name)) 
-    model.exp_name = os.path.join(os.path.join("exp2", exp_name), exp_name)
+    if not os.path.exists(os.path.join("exp3", exp_name)):
+        os.makedirs(os.path.join("exp3", exp_name)) 
+    model.exp_name = os.path.join(os.path.join("exp3", exp_name), exp_name)
 
     model = train_valid(model, ds)
     # torch.save(model.state_dict(), open(exp_name + '.pth', "wb")) #! 训练则开

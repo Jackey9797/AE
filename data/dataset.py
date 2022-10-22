@@ -67,7 +67,7 @@ def generate_stream_data(norm='minmax'):
     if norm == 'minmax': 
         normalize = lambda x: x.apply(lambda x: (x - x.min()) / (x.max() - x.min() + 1e-6) )
     elif norm == 'zscore': 
-        normalize = lambda x: x.apply(lambda x: (x - x.mean()) / x.std() )
+        normalize = lambda x: x.apply(lambda x: (x - x.mean()) / x.std() ) ##TODO check distribution
 
     df = get_df_data()  
     df.sort_values(by="week_id" , inplace=True, ascending=True)
@@ -112,6 +112,9 @@ class manyWeek:
         # self.data[idx].unsqueeze(0) 
         # print(idx, self.data[idx].shape)
         return self.data[idx], self.label[idx]  
+
+    def all_labels(self):  
+        return self.label 
 
 # In[ ]:
 

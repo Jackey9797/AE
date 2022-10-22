@@ -1,4 +1,5 @@
 from icarl import icarl
+from LwF import LwF
 from FineTune import FineTune
 import argparse
 
@@ -11,6 +12,7 @@ def parse_args():
     parser.add_argument('--epochs', type=int, default=20)                   # 步骤三，后面的help是我的描述
     parser.add_argument('--exp_name', type=str, default="exp_default")                   # 步骤三，后面的help是我的描述
     parser.add_argument('--optimizer', type=str, default="Adam")                   # 步骤三，后面的help是我的描述
+    parser.add_argument('--select_rule', type=str)                   # 步骤三，后面的help是我的描述
     parser.add_argument('--w_decay', type=float, default=0.0)                   # 步骤三，后面的help是我的描述
     parser.add_argument('--lamda', type=float, default=1)                   # 步骤三，后面的help是我的描述
     parser.add_argument('--NN', type=bool, default=False)                   # 步骤三，后面的help是我的描述
@@ -24,4 +26,7 @@ if __name__ == "__main__":
     if args.model == "FineTune": 
         FineTune(args.exp_name, args.st)
     if args.model == "icarl": 
-        icarl(args.lr, args.epochs, args.exp_name, optimizer=args.optimizer, weight_decay=args.w_decay, lamda=args.lamda, NN=args.NN, setting=args.st)
+        icarl(args.lr, args.epochs, args.exp_name, args.select_rule, optimizer=args.optimizer, weight_decay=args.w_decay, lamda=args.lamda, NN=args.NN, setting=args.st)
+
+    if args.model == "LwF": 
+        icarl(args.lr, args.epochs, args.exp_name, args.select_rule, optimizer=args.optimizer, weight_decay=args.w_decay, lamda=args.lamda, NN=args.NN, setting=args.st)

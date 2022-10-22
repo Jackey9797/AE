@@ -1,0 +1,36 @@
+.
+├── 1.txt
+├── dataset.ipynb
+├── dataset.py
+├── d_test.ipynb
+├── feature
+│   ├── part-00000-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00001-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00002-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00003-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00004-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00005-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00006-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00007-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00008-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00009-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00010-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00011-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00012-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00013-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00014-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00015-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00016-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00017-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00018-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00019-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00020-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   ├── part-00021-5ae21edc-d5a1-44db-bce8-2e655479a231-c000.csv
+│   └── _SUCCESS
+├── __pycache__
+│   └── dataset.cpython-310.pyc
+├── x_test.pkl
+├── x_train.pkl
+└── y_test.pkl
+
+2 directories, 31 files

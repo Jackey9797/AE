@@ -18,7 +18,7 @@ def reduce(p, m_, m):
     return q
 
 
-def construct(m, sub_ds, feature):
+def construct_by_ft(m, sub_ds, feature):
     import time 
     t0 = time.time()
     MAX_VAL = 1e20 ##  
@@ -44,8 +44,19 @@ def construct(m, sub_ds, feature):
 
     return p 
 
+def construct_by_score(m, sub_ds, e):
+    import time 
+    t0 = time.time()
+    MAX_VAL = 1e20 ##  
+    n = len(sub_ds)
+    e = (e - torch.mean(e)) / torch.std(e)
+    mu = torch.mean(e)
+    p = [sub_ds[i][0] for i in sorted(list(range(n)), key = lambda x: abs(mu - e[x]))[:m]] 
+    print("weew:\n", time.time()-t0)
+    return p 
 # import torch 
 # x = torch.ones(1, 4)
 # y = torch.ones(1, 4)
 # y=  torch.sum(torch.concat([x, y]), axis=0)
 # construct() 
+
