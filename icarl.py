@@ -91,13 +91,13 @@ def train_valid(model, ds):
         anomaly_score = []
         from sklearn.metrics import roc_auc_score
         for idx, (X, y) in enumerate(test_dl, 1):  # 测试
-            with torch.no_grad():
+            with torch.no_grad():       
                 if model.NN == False: 
                     X_pred = model(X)  
                     loss = model.loss_func_e(X_pred, X)
                     loss_list = loss.detach().tolist()      
                     anomaly_score += loss_list # 正常
-                else : 
+                else :                
                     X_pred, ft = model(X, return_feature=True) 
                     old_sample = torch.concat([x.reshape(1,-1) for x in p], axis=0)
                     output = model(old_sample, return_feature=True)[1] 
@@ -134,7 +134,7 @@ def icarl(lr, epochs, exp_name, select_rule, a=0.2, a0 = 5, m=1400, optimizer="A
 
     lr = lr # 1e-4
     epochs = epochs # 20
-    # device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device=torch.device('cuda:0')
     # print("Using %s !" % str(device))
     # batch_size = 16 #! 小一点好
     input_size = input_size # 502 #* vectore size
@@ -160,7 +160,7 @@ def icarl(lr, epochs, exp_name, select_rule, a=0.2, a0 = 5, m=1400, optimizer="A
     if not os.path.exists(os.path.join("exp3", exp_name)):
         os.makedirs(os.path.join("exp3", exp_name)) 
     model.exp_name = os.path.join(os.path.join("exp3", exp_name), exp_name)
-
+    model.to(device)
     model = train_valid(model, ds)
     # torch.save(model.state_dict(), open(exp_name + '.pth', "wb")) #! 训练则开
 

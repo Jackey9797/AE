@@ -1,7 +1,7 @@
 import torch
 
 def cal_NN(ft, q): 
-    score = torch.sum((ft.reshape(ft.shape[0], 1, ft.shape[1]).repeat(1, q.shape[0], 1) - q) ** 2, axis=2)
+    score = torch.sum((ft.reshape(ft.shape[0], 1, ft.shape[1]).repeat(1, q.shape[0], 1) - q) ** 2, axis=2)  #* 没有归一化 ！ & 没有对每周求均值向量
     return torch.min(score, dim=1)[0].tolist() 
 
 def get_norm2(x): 
@@ -17,13 +17,12 @@ def reduce(p, m_, m):
             j += 1
     return q
 
-
 def construct_by_ft(m, sub_ds, feature):
     import time 
     t0 = time.time()
     MAX_VAL = 1e20 ##  
     n = len(sub_ds)
-    mu = torch.sum(torch.concat([feature[i].reshape(1, -1) for i in range(n)]), axis=0) / n 
+    mu = torch.sum(torch.concat([feature[i].reshape(1, -1) for i in range(n)]), axis=0) / n  #* 没有归一化 ！
     p = [] 
     vis = {}
     sum_score = torch.zeros(1, len(feature[0]))

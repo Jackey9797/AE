@@ -30,49 +30,35 @@ def train_valid(model, ds):
         pre = (stream - 1) * 7000
         ds_1 = Subset(ds, range(pre, pre + week_n)) # 按周划分数据
         ds_2 = Subset(ds, range(pre + week_n, pre + 2 * week_n))
-        
-        if model.resample == True: 
-            class_sample_counts = [150, 200, 300]
-            weights = 1./ torch.tensor(class_sample_counts, dtype=torch.float)
-            # 这个 get_classes_for_all_imgs是关键
-            train_targets = train_dataset.get_classes_for_all_imgs()
-            samples_weights = weights[train_targets]
-
-            sampler = WeightedRandomSampler(weights=samples_weights, num_samples=len(samples_weights), replacement=True)
-            all_label = ds_2.all_label() 
-
-            c0 = torch.sum(all_label == 0)
-            c1 = torch.sum(all_label == 1)
-            train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=week_n, shuffle=False, sampler = sampler)
-        else: train_dl = DataLoader(ds_1, shuffle=True, batch_size=week_n) # 直接把一周所有数据当一个batch输入
+        train_dl = DataLoader(ds_1, shuffle=True, batch_size=week_n) # 直接把一周所有数据当一个batch输入
         test_dl = DataLoader(ds_2, shuffle=False, batch_size=week_n) 
 
-        #---- train loop 
-        model.train()
-        
-        for i in range(model.epochs): 
-            for idx, (X, y) in enumerate(train_dl, 1): 
-                # print(X.shape, y.shape)
-                model.optimizer.zero_grad()
-                X_pred = model(X)
-                e = model.loss_func_e(X_pred, X) # 计算异常分数
+        #---- train loop
+        if stream <= 35:  
+            model.train()
+            for i in range(model.epochs): 
+                for idx, (X, y) in enumerate(train_dl, 1): 
+                    # print(X.shape, y.shape)
+                    model.optimizer.zero_grad()
+                    X_pred = model(X)
+                    e = model.loss_func_e(X_pred, X) # 计算异常分数
 
-                idx_sorted = list(range(len(X))) 
-                idx_sorted.sort(key=lambda x: e[x], reverse=True) # 按异常分数降序排序
-                choose_num = int(len(X) * model.a) 
-                choose_mask = torch.zeros(e.shape) 
-                choose_mask[idx_sorted[:choose_num]] = 1  # 前a% 的mask为1 
+                    idx_sorted = list(range(len(X))) 
+                    idx_sorted.sort(key=lambda x: e[x], reverse=True) # 按异常分数降序排序
+                    choose_num = int(len(X) * model.a) 
+                    choose_mask = torch.zeros(e.shape) 
+                    choose_mask[idx_sorted[:choose_num]] = 1  # 前a% 的mask为1 
 
-                if model.setting == 'new': 
-                    if stream <= 35: y = torch.zeros_like(y)  
-                loss = torch.sum(e * (1 - y) * choose_mask) + torch.sum(torch.maximum(model.a0 - e, torch.tensor([0])) * y * choose_mask) 
-                # print(loss.shape)          
-                # loss
-                loss.backward() # 
+                    if model.setting == 'new': 
+                        if stream <= 35: y = torch.zeros_like(y)  
+                    loss = torch.sum(e * (1 - y) * choose_mask) + torch.sum(torch.maximum(model.a0 - e, torch.tensor([0])) * y * choose_mask) 
+                    # print(loss.shape)          
+                    # loss
+                    loss.backward() # 
 
-                model.optimizer.step()
-                if idx % 1 == 0: 
-                    print("loss now:", loss)  
+                    model.optimizer.step()
+                    if idx % 1 == 0: 
+                        print("loss now:", loss)  
 
         model.eval() ## 应该影响不大把
         anomaly_score = []
@@ -82,7 +68,7 @@ def train_valid(model, ds):
                 X_pred = model(X)  
                 loss = model.loss_func_e(X_pred, X)
                 loss_list = loss.detach().tolist()      
-                anomaly_score += torch.sum(X > 0.0001, axis=1).tolist()
+                anomaly_score += loss_list
 
             # print(len(y.tolist()), len(loss.detach().tolist()))
             # AUC_score = roc_auc_score(y.tolist(), loss.detach().tolist()) 
@@ -113,7 +99,7 @@ def FineTune(exp_name, setting):
     ds = dataset.manyWeek(x, y) 
 
     lr = 1e-3
-    epochs = 0
+    epochs = 20
     # device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # print("Using %s !" % str(device))
     # batch_size = 16 #! 小一点好
@@ -130,8 +116,8 @@ def FineTune(exp_name, setting):
     model.a = 0.2 #* 前a% 弱监督数据 百分比 超参
     model.a0 = 5
 
-    if not os.path.exists(os.path.join("exp3", exp_name)):
-        os.makedirs(os.path.join("exp3", exp_name)) 
-    exp_name = os.path.join(os.path.join("exp3", exp_name), exp_name)
+    if not os.path.exists(os.path.join("exp2", exp_name)):
+        os.makedirs(os.path.join("exp2", exp_name)) 
+    exp_name = os.path.join(os.path.join("exp2", exp_name), exp_name)
     model.exp_name = exp_name
     model = train_valid(model, ds)
